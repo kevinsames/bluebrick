@@ -1,0 +1,24 @@
+# Core packages
+pandas
+scikit-learn
+mlflow
+pyyaml
+
+# Spark (used with Databricks)
+pyspark>=3.3.0
+
+# Testing and linting
+pytest
+flake8
+black
+pre-commit
+
+# Documentation (optional)
+mkdocs
+mkdocs-material
+
+# Data validation (optional)
+great_expectations
+
+# Databricks CLI for automation
+databricks-cli

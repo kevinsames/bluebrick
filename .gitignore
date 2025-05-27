@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.env
+.venv
+env/
+venv/
+pip-log.txt
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Jupyter & Databricks
+.ipynb_checkpoints/
+.databricks/
+.dbc
+
+# VSCode / JetBrains
+.vscode/
+.idea/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+*.backup
+terraform.tfvars
+override.tf
+override.tf.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Pytest
+.cache/
+.pytest_cache/
+
+# Notebook/ML Artifacts
+*.dbml
+mlruns/
+model/
+logs/
