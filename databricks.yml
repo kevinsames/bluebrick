@@ -1,0 +1,45 @@
+---
+bundle:
+  name: bluebrick
+
+resources:
+  jobs:
+    bluebrick-quickstart:
+      name: bluebrick-quickstart
+      git_source:
+        git_url: ${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}.git
+        git_provider: github
+        git_branch: main
+      tasks:
+        - task_key: quickstart
+          notebook_task:
+            notebook_path: src/notebooks/00_quickstart_etl.ipynb
+          job_cluster_key: bluebrick_job_cluster
+      job_clusters:
+        - job_cluster_key: bluebrick_job_cluster
+          new_cluster:
+            spark_version: 14.3.x-scala2.12
+            node_type_id: Standard_DS3_v2
+            num_workers: 1
+            data_security_mode: SINGLE_USER
+
+targets:
+  dev:
+    workspace:
+      host: ${env.DATABRICKS_HOST}
+      root_path: /Users/${workspace.current_user.userName}/bluebrick-bundle
+    # dev uses main branch (already set above); override here if you use a different branch
+    resources:
+      jobs:
+        bluebrick-quickstart:
+          git_source:
+            git_branch: main
+  release:
+    workspace:
+      host: ${env.DATABRICKS_HOST}
+      root_path: /Users/${workspace.current_user.userName}/bluebrick-bundle
+    resources:
+      jobs:
+        bluebrick-quickstart:
+          git_source:
+            git_tag: ${env.GIT_TAG}

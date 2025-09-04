@@ -8,6 +8,8 @@ BlueBrick template:
 - Azure Databricks Workspace (SKU configurable)
 - Optional: Log Analytics + Diagnostic Settings
 - Optional: Databricks workspace-level resources (cluster, example UC grants)
+- Optional: Hub-and-Spoke networking with VNet peering and Storage private endpoints
+- Optional: Azure Data Factory (one per environment + one in Hub for Integration Runtimes)
 
 Notes
 - Databricks workspace-level resources are behind a feature flag (`enable_databricks`)
@@ -26,6 +28,30 @@ Usage
    ```
 4. Apply (when ready):
    ```bash
-   terraform -chdir=infrastructure/terraform apply -var-file=examples/terraform.tfvars.example
-   ```
+  terraform -chdir=infrastructure/terraform apply -var-file=examples/terraform.tfvars.example
 
+Multi-subscription (Hub & Spoke)
+- Use a single Service Principal with RBAC in all subscriptions (Hub + each Spoke env).
+- Login once in CI (`azure/login`) with any env’s subscription; the Terraform azurerm provider alias handles the Hub subscription.
+- Provide `hub_subscription_id` via tfvars. The default (spoke) subscription comes from `ARM_SUBSCRIPTION_ID`.
+- For multiple environments (one subscription per environment), run Terraform per environment, changing `ARM_SUBSCRIPTION_ID` and any env-specific vars (e.g., `tags.env`).
+
+Hub-and-Spoke (optional)
+- Toggle `enable_hub_spoke = true` to create:
+  - Hub VNet, Data Spoke VNet (with a subnet for private endpoints), Databricks Spoke VNet
+  - VNet peering between Hub ↔ Data and Hub ↔ Databricks
+  - Private DNS zones (`privatelink.blob.core.windows.net`, `privatelink.dfs.core.windows.net`) linked to Hub and Data Spoke
+  - Private Endpoints for the storage account (Blob + DFS) in the Data Spoke
+- Enable `enable_vnet_injection = true` to inject the Databricks workspace into the Databricks Spoke
+  - Two subnets are created (`dbx-public`, `dbx-private`) with required delegations and NSGs
+  - Workspace `custom_parameters` is set automatically
+  - Note: You may need to review NSG rules per your security requirements
+
+Azure Data Factory (optional)
+- Toggle `enable_adf = true` to provision:
+  - An ADF in the environment (spoke) subscription
+  - An ADF in the Hub subscription
+  - A Self-hosted Integration Runtime (SHIR) in the Hub ADF
+  - A linked Self-hosted IR in the environment ADF referencing the Hub SHIR
+- You can install SHIR nodes on your network using the keys from the Hub SHIR resource in the Azure Portal.
+   ```

@@ -1,9 +1,15 @@
 ---
-name: Terraform Plan / Apply (Infra)
+name: Deploy Azure (Hub/Envs)
 
 'on':
   workflow_dispatch:
     inputs:
+      environment:
+        description: 'Which target to deploy (hub/dev/test/prod)'
+        required: true
+        default: 'dev'
+        type: choice
+        options: [hub, dev, test, prod]
       apply:
         description: 'Apply changes (true/false)'
         required: false
@@ -12,9 +18,6 @@ name: Terraform Plan / Apply (Infra)
         description: 'Path to tfvars file'
         required: false
         default: 'infrastructure/terraform/examples/terraform.tfvars.example'
-  push:
-    paths:
-      - 'infrastructure/terraform/**'
 
 permissions:
   id-token: write
@@ -29,6 +32,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Select subscription and TF vars
+        shell: bash
+        run: |
+          case "${{ github.event.inputs.environment }}" in
+            hub)
+              echo "AZ_SUBSCRIPTION_ID=${{ secrets.HUB_SUBSCRIPTION_ID }}" >> "$GITHUB_ENV" ;;
+            dev)
+              echo "AZ_SUBSCRIPTION_ID=${{ secrets.ARM_SUBSCRIPTION_ID_DEV }}" >> "$GITHUB_ENV" ;;
+            test)
+              echo "AZ_SUBSCRIPTION_ID=${{ secrets.ARM_SUBSCRIPTION_ID_TEST }}" >> "$GITHUB_ENV" ;;
+            prod)
+              echo "AZ_SUBSCRIPTION_ID=${{ secrets.ARM_SUBSCRIPTION_ID_PROD }}" >> "$GITHUB_ENV" ;;
+          esac
+          # Pass Hub subscription id to Terraform variable for alias provider
+          echo "TF_VAR_hub_subscription_id=${{ secrets.HUB_SUBSCRIPTION_ID }}" >> "$GITHUB_ENV"
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -39,7 +58,7 @@ jobs:
         with:
           client-id: ${{ secrets.ARM_CLIENT_ID }}
           tenant-id: ${{ secrets.ARM_TENANT_ID }}
-          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          subscription-id: ${{ env.AZ_SUBSCRIPTION_ID }}
 
       - name: Terraform Init
         working-directory: infrastructure/terraform
@@ -53,7 +72,7 @@ jobs:
         working-directory: infrastructure/terraform
         run: terraform validate
 
-      - name: Terraform Plan
+      - name: Terraform Plan (${{ github.event.inputs.environment }})
         id: plan
         working-directory: infrastructure/terraform
         run: |
@@ -64,11 +83,11 @@ jobs:
       - name: Upload Plan
         uses: actions/upload-artifact@v4
         with:
-          name: tfplan
+          name: tfplan-${{ github.event.inputs.environment }}
           path: infrastructure/terraform/tfplan
 
-      - name: Terraform Apply
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.apply == 'true' }}
+      - name: Terraform Apply (${{ github.event.inputs.environment }})
+        if: ${{ github.event.inputs.apply == 'true' }}
         environment: production
         working-directory: infrastructure/terraform
         run: terraform apply -input=false tfplan

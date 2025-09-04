@@ -81,12 +81,16 @@ Pre-commit Hooks
 - Auto-fix on commit: Ruff runs with `--fix` and Black formats code. If files are modified, the commit is blocked; re-stage and commit again.
 - Update hook versions: `pre-commit autoupdate` (then commit the updated `.pre-commit-config.yaml`).
 
+Note: The `data-factory/` folder is excluded from pre-commit hooks to avoid formatting non-Python ADF JSON artifacts.
+
 
 CI/CD Overview
 --------------
 - `.github/workflows/ci.yml`: Runs on push/PR. Sets up Python, installs deps, runs ruff, black --check, and pytest.
-- `.github/workflows/plan_apply_infra.yml`: On push to Terraform paths and on manual dispatch. Performs `terraform fmt`, `validate`, `plan` (artifacts uploaded). `apply` when manually requested and protected by the `production` environment.
-- `.github/workflows/deploy_databricks.yml`: On main and on demand. Auths to Databricks via `DATABRICKS_HOST`/`DATABRICKS_TOKEN`, uploads notebooks and configs, and creates/triggers a simple job to run the quickstart notebook.
+- `.github/workflows/deploy-azure-envs.yml`: Manual dispatch workflow to deploy infra with Terraform to hub/dev/test/prod. Select the environment at run time; runs `init`, `fmt`, `validate`, `plan`, and optional `apply`.
+- `.github/workflows/deploy-databricks-dev.yml`: On push to `main` when `src/**` changes (and on demand). Deploys the bundle to target `dev` and runs the `bluebrick-quickstart` job, sourcing code from the `main` branch.
+- `.github/workflows/deploy-databricks.yml`: On tag push or release publish (and on demand). Deploys the bundle to target `release` and runs the job, sourcing code from the Git tag.
+- `.github/workflows/deploy-data-factory.yml`: Manual dispatch to deploy only Azure Data Factory resources (hub or env). For `dev`, also wires ADF Git integration to this repo’s `data-factory/` folder.
 
 
 Infrastructure (Terraform)
@@ -96,11 +100,32 @@ Files under `infrastructure/terraform/`:
 - `variables.tf`: prefix, location, tags, workspace SKU, UC flags, etc.
 - `main.tf`: resource group, ADLS Gen2 (HNS=true) with `raw` and `silver` containers, Databricks workspace, optional diagnostics → Log Analytics
 - `databricks/*`: workspace-scoped examples (cluster, UC grants) gated by `enable_databricks` and `enable_uc`
+- `networking/hub_spoke.tf`: optional Hub-and-Spoke VNets, peering, Private DNS zones, and Private Endpoints for ADLS Gen2
+- `data-factory/`: Git root for Azure Data Factory (dev authoring). Enable ADF GitHub integration via Terraform with `enable_adf_github=true`.
 - `examples/terraform.tfvars.example`: sane defaults to get started
 
 Provider auth notes:
 - Azure: use GitHub OIDC via `azure/login@v2` (as in workflow) or export ARM_ env vars locally
-- Databricks: by default we use host + PAT via variables; set `enable_databricks=true` to create cluster/grants after the workspace exists
+- Databricks: use host + PAT via `DATABRICKS_HOST`/`DATABRICKS_TOKEN`. Terraform can optionally create cluster/pools on demand (`enable_databricks=true`). Jobs are managed by Asset Bundles and reference code from GitHub.
+
+Subscriptions per environment + Hub
+-----------------------------------
+- Use one Azure subscription per environment (dev/test/prod) and a separate Hub subscription for shared networking.
+- In CI, authenticate once via `azure/login` using the environment subscription (ARM_SUBSCRIPTION_ID).
+- Set `hub_subscription_id` (tfvar) so the Terraform provider alias `azurerm.hub` targets the Hub subscription for networking, DNS, and peering.
+- Run Terraform once per environment, switching `ARM_SUBSCRIPTION_ID` (the spoke) and environment tags; the same state can manage peering and hub links via the alias.
+
+Hub-and-Spoke architecture (optional)
+-------------------------------------
+- Enable `enable_hub_spoke=true` in Terraform to provision:
+  - Hub VNet, Data Spoke (private endpoints), Databricks Spoke (for VNet injection)
+  - Peering between Hub↔Data and Hub↔Databricks
+  - Private DNS zones for `privatelink.blob.core.windows.net` and `privatelink.dfs.core.windows.net` linked to Hub+Data Spoke
+  - Private Endpoints for the storage account (Blob + DFS) in the Data Spoke
+- To place the Databricks workspace in the Databricks Spoke VNet, set `enable_vnet_injection=true`.
+  - Creates `dbx-public` and `dbx-private` subnets (delegated to `Microsoft.Databricks/workspaces`) and associates NSGs.
+  - Workspace `custom_parameters` is configured to use these subnets.
+  - Adjust NSG rules/UDRs to your security policy if you route via a firewall.
 
 
 Sample Notebook (PySpark + SQL)
@@ -116,6 +141,7 @@ Secrets and Configuration
 Required GitHub Secrets:
 - ARM_CLIENT_ID, ARM_CLIENT_SECRET, ARM_TENANT_ID, ARM_SUBSCRIPTION_ID (Terraform Azure auth)
 - DATABRICKS_HOST, DATABRICKS_TOKEN (Databricks CLI auth for deploy)
+- HUB_SUBSCRIPTION_ID, ARM_SUBSCRIPTION_ID_DEV, ARM_SUBSCRIPTION_ID_TEST, ARM_SUBSCRIPTION_ID_PROD (for multi-subscription workflows)
 
 Optional Terraform variables (as secrets or `tfvars`):
 - TF_VAR_prefix, TF_VAR_location, TF_VAR_enable_databricks, TF_VAR_databricks_host, TF_VAR_databricks_token, TF_VAR_enable_uc, etc.

@@ -1,0 +1,120 @@
+---
+name: Deploy Data Factory
+
+'on':
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Which target to deploy (hub/dev/test/prod)'
+        required: true
+        default: 'dev'
+        type: choice
+        options: [hub, dev, test, prod]
+      apply:
+        description: 'Apply changes (true/false)'
+        required: false
+        default: 'false'
+      tfvars_path:
+        description: 'Path to tfvars file'
+        required: false
+        default: 'infrastructure/terraform/examples/terraform.tfvars.example'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform-adf:
+    runs-on: ubuntu-latest
+    env:
+      TF_IN_AUTOMATION: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select subscription and ADF variables
+        shell: bash
+        run: |
+          # Select the Azure subscription for the chosen environment
+          case "${{ github.event.inputs.environment }}" in
+            hub)
+              echo "AZ_SUBSCRIPTION_ID=${{ secrets.HUB_SUBSCRIPTION_ID }}" >> "$GITHUB_ENV" ;;
+            dev)
+              echo "AZ_SUBSCRIPTION_ID=${{ secrets.ARM_SUBSCRIPTION_ID_DEV }}" >> "$GITHUB_ENV" ;;
+            test)
+              echo "AZ_SUBSCRIPTION_ID=${{ secrets.ARM_SUBSCRIPTION_ID_TEST }}" >> "$GITHUB_ENV" ;;
+            prod)
+              echo "AZ_SUBSCRIPTION_ID=${{ secrets.ARM_SUBSCRIPTION_ID_PROD }}" >> "$GITHUB_ENV" ;;
+          esac
+
+          # Enable ADF in Terraform and set GitHub integration for dev only
+          echo "TF_VAR_enable_adf=true" >> "$GITHUB_ENV"
+          if [ "${{ github.event.inputs.environment }}" = "dev" ]; then
+            echo "TF_VAR_enable_adf_github=true" >> "$GITHUB_ENV"
+            OWNER="${GITHUB_REPOSITORY%/*}"
+            REPO="${GITHUB_REPOSITORY#*/}"
+            echo "TF_VAR_github_account_name=$OWNER" >> "$GITHUB_ENV"
+            echo "TF_VAR_github_repository_name=$REPO" >> "$GITHUB_ENV"
+            echo "TF_VAR_github_branch=main" >> "$GITHUB_ENV"
+            echo "TF_VAR_github_root_folder=data-factory" >> "$GITHUB_ENV"
+          else
+            echo "TF_VAR_enable_adf_github=false" >> "$GITHUB_ENV"
+          fi
+
+          # Always pass hub subscription for provider alias
+          echo "TF_VAR_hub_subscription_id=${{ secrets.HUB_SUBSCRIPTION_ID }}" >> "$GITHUB_ENV"
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant-id: ${{ secrets.ARM_TENANT_ID }}
+          subscription-id: ${{ env.AZ_SUBSCRIPTION_ID }}
+
+      - name: Terraform Init
+        working-directory: infrastructure/terraform
+        run: terraform init -input=false
+
+      - name: Terraform Validate
+        working-directory: infrastructure/terraform
+        run: terraform validate
+
+      - name: Terraform Plan ADF (${{ github.event.inputs.environment }})
+        id: plan
+        working-directory: infrastructure/terraform
+        run: |
+          case "${{ github.event.inputs.environment }}" in
+            hub)
+              TARGETS=(
+                "-target=azurerm_data_factory.hub"
+                "-target=azurerm_data_factory_integration_runtime_self_hosted.hub_shir"
+                "-target=azurerm_resource_group.hub"
+              ) ;;
+            *)
+              TARGETS=(
+                "-target=azurerm_data_factory.env"
+                "-target=azurerm_data_factory_integration_runtime_self_hosted.env_linked_shir"
+                "-target=azurerm_resource_group.bluebrick"
+              ) ;;
+          esac
+          terraform plan -input=false \
+            -var-file="${{ github.event.inputs.tfvars_path }}" \
+            ${TARGETS[@]} \
+            -out=tfplan
+
+      - name: Upload Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-adf-${{ github.event.inputs.environment }}
+          path: infrastructure/terraform/tfplan
+
+      - name: Terraform Apply ADF (${{ github.event.inputs.environment }})
+        if: ${{ github.event.inputs.apply == 'true' }}
+        environment: production
+        working-directory: infrastructure/terraform
+        run: terraform apply -input=false tfplan

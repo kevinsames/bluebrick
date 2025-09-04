@@ -19,6 +19,7 @@ log_analytics_retention_days = 30
 enable_databricks = false
 databricks_host   = "https://adb-xxxxxxxxxxxxxxxx.xx.azuredatabricks.net"
 databricks_token  = "<pat>"
+enable_instance_pool = false
 
 # Unity Catalog example settings
 enable_uc  = false
@@ -27,3 +28,21 @@ uc_schema  = "bluebrick_dev"
 
 # Databricks Runtime for the sample cluster
 dbr_version = "14.3.x-scala2.12"
+
+# Hub-and-Spoke networking
+enable_hub_spoke          = false
+hub_address_space         = "10.0.0.0/16"
+spoke_data_address_space  = "10.1.0.0/16"
+spoke_dbx_address_space   = "10.2.0.0/16"
+enable_vnet_injection     = false
+
+# Multi-subscription: Hub subscription id (spoke uses ARM_SUBSCRIPTION_ID)
+hub_subscription_id = ""
+
+# Azure Data Factory
+enable_adf = false
+enable_adf_github      = false
+github_account_name    = "<your-org-or-user>"
+github_repository_name = "bluebrick"
+github_branch          = "main"
+github_root_folder     = "data-factory"

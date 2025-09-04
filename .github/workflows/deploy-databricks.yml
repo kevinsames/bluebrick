@@ -1,0 +1,47 @@
+---
+name: Deploy Databricks (release)
+
+'on':
+  push:
+    tags:
+      - 'v*'
+      - '*.*.*'
+  release:
+    types: [published]
+  workflow_dispatch: {}
+
+jobs:
+  deploy-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Databricks CLI
+        uses: databricks/setup-cli@v2
+
+      - name: Configure Databricks auth
+        shell: bash
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+        run: |
+          if [[ -z "$DATABRICKS_HOST" || -z "$DATABRICKS_TOKEN" ]]; then
+            echo "DATABRICKS_HOST and DATABRICKS_TOKEN secrets are required" >&2
+            exit 1
+          fi
+          databricks auth profiles-location set ./
+          printf "%s\n%s\n" "$DATABRICKS_HOST" "$DATABRICKS_TOKEN" | databricks configure --token
+
+      - name: Deploy bundle (release)
+        env:
+          GIT_TAG: ${{ github.ref_name }}
+        run: |
+          databricks bundle validate -t release
+          databricks bundle deploy -t release
+
+      - name: Run quickstart job (release)
+        env:
+          GIT_TAG: ${{ github.ref_name }}
+        run: |
+          databricks bundle run bluebrick-quickstart -t release
