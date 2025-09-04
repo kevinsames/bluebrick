@@ -105,7 +105,7 @@ Provider auth notes:
 
 Sample Notebook (PySpark + SQL)
 -------------------------------
-File: `src/notebooks/00_quickstart_etl.py`
+File: `src/notebooks/00_quickstart_etl.ipynb`
 - Reads config (`BLUEBRICK_ENV` or widget)
 - Builds a tiny in-memory dataset, cleans it using `bluebrick.transformations.clean_sales`, and writes Delta to `catalog.schema.table` via Unity Catalog
 - Runs 2 simple SQL checks (counts + schema)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import re
 
 from pyspark.sql import DataFrame, SparkSession
@@ -23,10 +24,17 @@ def get_spark(app_name: str = "bluebrick") -> SparkSession:
             "No active SparkSession detected; creating a new one: %s", exc
         )
 
+    # Harden local startup for notebooks/CI where hostname may not resolve
+    os.environ.setdefault("SPARK_LOCAL_IP", "127.0.0.1")
+
     return (
         SparkSession.builder.master("local[1]")
         .appName(app_name)
         .config("spark.sql.shuffle.partitions", "1")
+        .config("spark.ui.showConsoleProgress", "false")
+        .config("spark.driver.bindAddress", "127.0.0.1")
+        .config("spark.driver.host", "127.0.0.1")
+        .config("spark.driver.extraJavaOptions", "-Djava.net.preferIPv4Stack=true")
         .getOrCreate()
     )
 

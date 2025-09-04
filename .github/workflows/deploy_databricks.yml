@@ -42,6 +42,7 @@ jobs:
           databricks workspace mkdirs "$BASE"
           databricks workspace import-dir --overwrite src/notebooks "$BASE/notebooks"
           databricks workspace import-dir --overwrite configs "$BASE/configs"
+          databricks workspace import-dir --overwrite src/bluebrick "$BASE/bluebrick"
 
       - name: Ensure/Run quickstart job
         env:
@@ -56,7 +57,7 @@ jobs:
                 {
                   task_key: "quickstart",
                   notebook_task: {
-                    notebook_path: ($base + "/notebooks/00_quickstart_etl.py"),
+                  notebook_path: ($base + "/notebooks/00_quickstart_etl.ipynb"),
                     source: "WORKSPACE"
                   },
                   job_cluster_key: "bluebrick_job_cluster"

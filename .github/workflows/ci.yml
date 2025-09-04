@@ -34,7 +34,7 @@ jobs:
       - name: Ruff lint
         run: |
           pip install ruff==0.6.3
-          ruff src tests
+          ruff check src tests
 
       - name: Black check
         run: |
