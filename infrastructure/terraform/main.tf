@@ -11,7 +11,7 @@ locals {
   sa_name   = substr(replace(lower("st${var.prefix}${random_string.suffix.result}"), "-", ""), 0, 24)
   la_name   = "law-${var.prefix}"
   wb_name   = "dbw-${var.prefix}"
-  raw_name  = "raw"
+  raw_name  = "coal"
   silver_name = "silver"
   adf_env_name = "adf-${var.prefix}"
   adf_hub_name = "adf-${var.prefix}-hub"

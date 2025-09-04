@@ -4,7 +4,7 @@ This Terraform stack provisions a minimal Azure + Databricks foundation for the
 BlueBrick template:
 
 - Azure Resource Group
-- Azure Data Lake Storage Gen2 (StorageV2 with HNS), containers: `raw`, `silver`
+- Azure Data Lake Storage Gen2 (StorageV2 with HNS), containers: `coal` (raw landing), `silver` (optional)
 - Azure Databricks Workspace (SKU configurable)
 - Optional: Log Analytics + Diagnostic Settings
 - Optional: Databricks workspace-level resources (cluster, example UC grants)
@@ -54,4 +54,10 @@ Azure Data Factory (optional)
   - A Self-hosted Integration Runtime (SHIR) in the Hub ADF
   - A linked Self-hosted IR in the environment ADF referencing the Hub SHIR
 - You can install SHIR nodes on your network using the keys from the Hub SHIR resource in the Azure Portal.
+
+Data Layers
+- Coal: Raw, 1:1 persistence of source data. Stored under the `coal` container, with one folder per ingestion tool (e.g., `adf/`, `lakeflow/`, `upload/`). Define a data contract per data source.
+- Bronze: Unity Catalog managed Delta tables. Append-only; no deletes. 1:1 with coal artifacts but typed, deduplicated, with metadata columns. Optionally preserve history (SCD2).
+- Silver: Unity Catalog managed Delta tables enriched with business logic and standardization.
+- Gold: Unity Catalog managed Delta tables serving downstream use cases; one schema per use case with read/write permissions per interface contract.
    ```

@@ -1,164 +1,52 @@
-BlueBrick: Azure Databricks Template (Terraform + GitHub Actions)
-===============================================================
+BlueBrick — Azure Databricks Template
+====================================
 
-BlueBrick is a production-ready GitHub template repository for Azure Databricks projects. It provides:
+Production‑ready template for Azure Databricks with Terraform IaC and GitHub Actions CI/CD. It includes Unity Catalog‑ready notebooks/jobs via Databricks Asset Bundles, optional Azure Data Factory for ingestion, and optional hub‑and‑spoke networking.
 
-- Clean repo structure for Databricks on Azure
-- Terraform infrastructure (RG, ADLS Gen2, Databricks Workspace, optional diagnostics)
-- A minimal PySpark ETL notebook that writes a Delta table in Unity Catalog
-- GitHub Actions for CI (lint/test), Terraform plan/apply, and Databricks deployment
-- Clear environment separation and configuration via YAML (no secrets in code)
+Docs
+----
+- Start here: `docs/index.md`
+- Quickstart: `docs/quickstart.md`
+- Architecture (Hub/Spoke + Coal/Bronze/Silver/Gold): `docs/architecture.md`
+- Infrastructure (Terraform): `docs/infrastructure.md`
+- CI/CD Workflows: `docs/ci-cd.md`
+- Databricks (Bundles, UC): `docs/databricks.md`
+- Data Factory: `docs/data-factory.md`
+- Configuration and secrets: `docs/configuration.md`
+- Local development: `docs/local-dev.md`
+- Troubleshooting: `docs/troubleshooting.md`
 
-Why “BlueBrick”? Azure is blue, Databricks are the “bricks”, and this repo is your blueprint.
+What’s Inside
+-------------
+- IaC: `infrastructure/terraform/` (RG, ADLS Gen2 `coal` landing container, Databricks workspace, optional hub/spoke, ADF, UC examples)
+- Code: `src/` (package + notebooks) and `configs/` (env YAML)
+- Databricks bundle: `databricks.yml`
+- ADF Git root (dev authoring): `data-factory/` (excluded from pre‑commit)
+- Workflows: `.github/workflows/`
 
-
-Quick Start (30 minutes)
------------------------
-1) Fork the repo and clone locally.
-
-2) Use Python 3.10 and create a `.venv` (recommended):
-- macOS/Linux:
-  - Ensure Python 3.10 is active (for example, with pyenv: `pyenv install 3.10.14 && pyenv local 3.10.14`)
-  - `python -m venv .venv && source .venv/bin/activate`
-- Windows PowerShell:
-  - `python -m venv .venv; .\.venv\Scripts\Activate.ps1`
-- Install deps:
-  - `pip install -r requirements.txt`
-
-3) Configure GitHub Secrets (Repository settings → Secrets and variables → Actions):
-- ARM_CLIENT_ID, ARM_CLIENT_SECRET, ARM_TENANT_ID, ARM_SUBSCRIPTION_ID
-- DATABRICKS_HOST, DATABRICKS_TOKEN
-
-4) Provision Infra (Terraform):
-- Run the workflow “Terraform Plan / Apply (Infra)” → Run workflow.
-- Optionally set `apply=true` to apply via a protected “production” environment reviewer.
-- Or run locally:
-  - `terraform -chdir=infrastructure/terraform init`
-  - `terraform -chdir=infrastructure/terraform plan -var-file=infrastructure/terraform/examples/terraform.tfvars.example`
-  - `terraform -chdir=infrastructure/terraform apply -var-file=infrastructure/terraform/examples/terraform.tfvars.example`
-
-5) Deploy Notebooks to Databricks:
-- Run the workflow “Deploy Databricks Artifacts”.
-- It uploads `src/notebooks` and `configs` to `/Users/<you>/bluebrick` in the workspace.
-- It creates/updates a job named `bluebrick-quickstart` and triggers a run.
-
-6) Verify in Unity Catalog:
-- The notebook writes `main.bluebrick_dev.example_sales` by default (env = dev).
-- In a SQL cell (or Data Explorer), run:
-  - `SELECT count(*) FROM main.bluebrick_dev.example_sales;`
-  - `DESCRIBE TABLE main.bluebrick_dev.example_sales;`
-
-
-Configuration and Environments
-------------------------------
-- YAML files live under `configs/*.yaml` and include catalog/schema/table and sample storage paths.
-- The loader uses:
-  1. Databricks widget `bluebrick_env` (if present)
-  2. `BLUEBRICK_ENV` environment variable
-  3. Default: `dev`
-- Example files: `configs/dev.yaml`, `configs/test.yaml`, `configs/prod.yaml`.
-
-
-Local Development
+Workflows (CI/CD)
 -----------------
-- Python 3.10+ (tested on 3.10 and 3.12 with Spark 3.5.x)
-- Optional: create a virtual environment
-  - `python -m venv .venv && source .venv/bin/activate`
-  - `pip install -r requirements.txt`
-- Lint:
-  - `ruff src tests`
-  - `black --check --line-length 100 .`
-- Test:
-  - `pytest -q`
+- `ci.yml`: lint (Ruff), format check (Black), tests (pytest)
+- `deploy-azure-envs.yml`: manual; deploy Terraform to `hub|dev|test|prod`
+- `deploy-data-factory.yml`: manual; deploy only ADF (dev links to `data-factory/`)
+- `deploy-databricks-dev.yml`: on `main` when `src/**` changes; deploy bundle to `dev` and run job
+- `deploy-databricks.yml`: on tag or release; deploy bundle to `release` (uses tag as source)
 
-Note: Local tests use a lightweight Spark session (pyspark). Java (JDK 11) is required on your machine.
+Prereqs
+-------
+- Python 3.10+ and JDK 11
+- Databricks CLI auth: `DATABRICKS_HOST`, `DATABRICKS_TOKEN`
+- Azure OIDC creds and subscription IDs (see `docs/configuration.md`)
 
-
-Pre-commit Hooks
-----------------
-- Install hooks: `pre-commit install` (tools are included in `requirements.txt`).
-- Run on all files: `pre-commit run --all-files`.
-- Auto-fix on commit: Ruff runs with `--fix` and Black formats code. If files are modified, the commit is blocked; re-stage and commit again.
-- Update hook versions: `pre-commit autoupdate` (then commit the updated `.pre-commit-config.yaml`).
-
-Note: The `data-factory/` folder is excluded from pre-commit hooks to avoid formatting non-Python ADF JSON artifacts.
-
-
-CI/CD Overview
---------------
-- `.github/workflows/ci.yml`: Runs on push/PR. Sets up Python, installs deps, runs ruff, black --check, and pytest.
-- `.github/workflows/deploy-azure-envs.yml`: Manual dispatch workflow to deploy infra with Terraform to hub/dev/test/prod. Select the environment at run time; runs `init`, `fmt`, `validate`, `plan`, and optional `apply`.
-- `.github/workflows/deploy-databricks-dev.yml`: On push to `main` when `src/**` changes (and on demand). Deploys the bundle to target `dev` and runs the `bluebrick-quickstart` job, sourcing code from the `main` branch.
-- `.github/workflows/deploy-databricks.yml`: On tag push or release publish (and on demand). Deploys the bundle to target `release` and runs the job, sourcing code from the Git tag.
-- `.github/workflows/deploy-data-factory.yml`: Manual dispatch to deploy only Azure Data Factory resources (hub or env). For `dev`, also wires ADF Git integration to this repo’s `data-factory/` folder.
-
-
-Infrastructure (Terraform)
---------------------------
-Files under `infrastructure/terraform/`:
-- `providers.tf`: azurerm + databricks providers; includes commented remote state example
-- `variables.tf`: prefix, location, tags, workspace SKU, UC flags, etc.
-- `main.tf`: resource group, ADLS Gen2 (HNS=true) with `raw` and `silver` containers, Databricks workspace, optional diagnostics → Log Analytics
-- `databricks/*`: workspace-scoped examples (cluster, UC grants) gated by `enable_databricks` and `enable_uc`
-- `networking/hub_spoke.tf`: optional Hub-and-Spoke VNets, peering, Private DNS zones, and Private Endpoints for ADLS Gen2
-- `data-factory/`: Git root for Azure Data Factory (dev authoring). Enable ADF GitHub integration via Terraform with `enable_adf_github=true`.
-- `examples/terraform.tfvars.example`: sane defaults to get started
-
-Provider auth notes:
-- Azure: use GitHub OIDC via `azure/login@v2` (as in workflow) or export ARM_ env vars locally
-- Databricks: use host + PAT via `DATABRICKS_HOST`/`DATABRICKS_TOKEN`. Terraform can optionally create cluster/pools on demand (`enable_databricks=true`). Jobs are managed by Asset Bundles and reference code from GitHub.
-
-Subscriptions per environment + Hub
------------------------------------
-- Use one Azure subscription per environment (dev/test/prod) and a separate Hub subscription for shared networking.
-- In CI, authenticate once via `azure/login` using the environment subscription (ARM_SUBSCRIPTION_ID).
-- Set `hub_subscription_id` (tfvar) so the Terraform provider alias `azurerm.hub` targets the Hub subscription for networking, DNS, and peering.
-- Run Terraform once per environment, switching `ARM_SUBSCRIPTION_ID` (the spoke) and environment tags; the same state can manage peering and hub links via the alias.
-
-Hub-and-Spoke architecture (optional)
--------------------------------------
-- Enable `enable_hub_spoke=true` in Terraform to provision:
-  - Hub VNet, Data Spoke (private endpoints), Databricks Spoke (for VNet injection)
-  - Peering between Hub↔Data and Hub↔Databricks
-  - Private DNS zones for `privatelink.blob.core.windows.net` and `privatelink.dfs.core.windows.net` linked to Hub+Data Spoke
-  - Private Endpoints for the storage account (Blob + DFS) in the Data Spoke
-- To place the Databricks workspace in the Databricks Spoke VNet, set `enable_vnet_injection=true`.
-  - Creates `dbx-public` and `dbx-private` subnets (delegated to `Microsoft.Databricks/workspaces`) and associates NSGs.
-  - Workspace `custom_parameters` is configured to use these subnets.
-  - Adjust NSG rules/UDRs to your security policy if you route via a firewall.
-
-
-Sample Notebook (PySpark + SQL)
--------------------------------
-File: `src/notebooks/00_quickstart_etl.ipynb`
-- Reads config (`BLUEBRICK_ENV` or widget)
-- Builds a tiny in-memory dataset, cleans it using `bluebrick.transformations.clean_sales`, and writes Delta to `catalog.schema.table` via Unity Catalog
-- Runs 2 simple SQL checks (counts + schema)
-
-
-Secrets and Configuration
--------------------------
-Required GitHub Secrets:
-- ARM_CLIENT_ID, ARM_CLIENT_SECRET, ARM_TENANT_ID, ARM_SUBSCRIPTION_ID (Terraform Azure auth)
-- DATABRICKS_HOST, DATABRICKS_TOKEN (Databricks CLI auth for deploy)
-- HUB_SUBSCRIPTION_ID, ARM_SUBSCRIPTION_ID_DEV, ARM_SUBSCRIPTION_ID_TEST, ARM_SUBSCRIPTION_ID_PROD (for multi-subscription workflows)
-
-Optional Terraform variables (as secrets or `tfvars`):
-- TF_VAR_prefix, TF_VAR_location, TF_VAR_enable_databricks, TF_VAR_databricks_host, TF_VAR_databricks_token, TF_VAR_enable_uc, etc.
-
-Databricks secrets for storage access: use a Key Vault–backed secret scope or Managed Identity. Do not hardcode credentials.
-
-
-Acceptance Criteria Mapping
----------------------------
-1. Unit tests: `tests/test_transformations.py` validates deterministic transforms; runs in CI
-2. Lint: `ruff` and `black --check` pass in CI
-3. Terraform: `validate` passes; `plan` runs with example tfvars in workflow
-4. Notebook: writes a Delta table to UC (`catalog.schema.table`) and verifies with follow-up SQL
-5. CI pipelines: green on a fresh fork with secrets configured
-6. Quickstart: end-to-end from fork → infra → run → verify in ~30 minutes
-
+Quickstart (1–2 mins overview)
+------------------------------
+1) Create a venv and install deps: `python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`
+2) Add GitHub secrets (Azure + Databricks; multi‑sub IDs if used)
+3) Run “Deploy Azure (Hub/Envs)” for `dev` (apply=true)
+4) Push changes under `src/**` or trigger “Deploy Databricks (dev)”
+5) Check the `bluebrick-quickstart` job and verify UC table output
 
 License
 -------
-MIT. See `LICENSE`.
+MIT — see `LICENSE`.
+
