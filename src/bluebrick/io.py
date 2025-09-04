@@ -20,9 +20,7 @@ def get_spark(app_name: str = "bluebrick") -> SparkSession:
         if spark is not None:
             return spark
     except Exception as exc:  # pragma: no cover - environment dependent
-        logging.getLogger(__name__).debug(
-            "No active SparkSession detected; creating a new one: %s", exc
-        )
+        logging.getLogger(__name__).debug("No active SparkSession detected; creating a new one: %s", exc)
 
     # Harden local startup for notebooks/CI where hostname may not resolve
     os.environ.setdefault("SPARK_LOCAL_IP", "127.0.0.1")

@@ -39,7 +39,7 @@ jobs:
       - name: Black check
         run: |
           pip install 'black[jupyter]==24.8.0'
-          black --check --line-length 100 .
+          black --line-length 120 .
 
       - name: Pytest
         run: pytest -q

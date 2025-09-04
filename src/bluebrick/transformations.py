@@ -33,4 +33,3 @@ def clean_sales(df: DataFrame) -> DataFrame:
     )
 
     return cleaned
-
