@@ -1,8 +1,9 @@
+---
 name: Deploy Databricks Artifacts
 
-on:
+'on':
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'src/notebooks/**'
       - '.github/workflows/deploy_databricks.yml'
@@ -31,10 +32,7 @@ jobs:
             exit 1
           fi
           databricks auth profiles-location set ./
-          databricks configure --token <<EOF
-${DATABRICKS_HOST}
-${DATABRICKS_TOKEN}
-EOF
+          printf "%s\n%s\n" "$DATABRICKS_HOST" "$DATABRICKS_TOKEN" | databricks configure --token
 
       - name: Import notebooks and configs to workspace
         env:
@@ -50,36 +48,37 @@ EOF
           USERNAME: ${{ github.actor }}
         run: |
           BASE="/Users/${USERNAME}/bluebrick"
-          JOB_PAYLOAD=$(cat <<JSON
-          {
-            "name": "bluebrick-quickstart",
-            "tasks": [
-              {
-                "task_key": "quickstart",
-                "notebook_task": {
-                  "notebook_path": "$BASE/notebooks/00_quickstart_etl.py",
-                  "source": "WORKSPACE"
-                },
-                "job_cluster_key": "bluebrick_job_cluster"
-              }
-            ],
-            "job_clusters": [
-              {
-                "job_cluster_key": "bluebrick_job_cluster",
-                "new_cluster": {
-                  "spark_version": "13.3.x-scala2.12",
-                  "node_type_id": "Standard_DS3_v2",
-                  "num_workers": 1,
-                  "data_security_mode": "SINGLE_USER"
+          JOB_PAYLOAD=$(jq -n \
+            --arg base "$BASE" \
+            '{
+              name: "bluebrick-quickstart",
+              tasks: [
+                {
+                  task_key: "quickstart",
+                  notebook_task: {
+                    notebook_path: ($base + "/notebooks/00_quickstart_etl.py"),
+                    source: "WORKSPACE"
+                  },
+                  job_cluster_key: "bluebrick_job_cluster"
                 }
-              }
-            ]
-          }
-JSON
-          )
+              ],
+              job_clusters: [
+                {
+                  job_cluster_key: "bluebrick_job_cluster",
+                  new_cluster: {
+                    spark_version: "14.3.x-scala2.12",
+                    node_type_id: "Standard_DS3_v2",
+                    num_workers: 1,
+                    data_security_mode: "SINGLE_USER"
+                  }
+                }
+              ]
+            }')
 
           # Try to find existing job by name
-          JOB_ID=$(databricks jobs list --output JSON | jq -r '.jobs[] | select(.settings.name=="bluebrick-quickstart") | .job_id' | head -n1)
+          JOB_ID=$(databricks jobs list --output JSON \
+            | jq -r '.jobs[] | select(.settings.name=="bluebrick-quickstart") | .job_id' \
+            | head -n1)
           if [[ -z "$JOB_ID" || "$JOB_ID" == "null" ]]; then
             echo "Creating job 'bluebrick-quickstart'"
             JOB_ID=$(echo "$JOB_PAYLOAD" | databricks jobs create --json-file - | jq -r '.job_id')
@@ -90,4 +89,3 @@ JSON
 
           echo "Triggering run for job $JOB_ID"
           databricks jobs run-now --job-id "$JOB_ID"
-

@@ -26,5 +26,4 @@ uc_catalog = "main"
 uc_schema  = "bluebrick_dev"
 
 # Databricks Runtime for the sample cluster
-dbr_version = "13.3.x-scala2.12"
-
+dbr_version = "14.3.x-scala2.12"

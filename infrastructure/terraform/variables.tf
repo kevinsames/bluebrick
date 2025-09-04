@@ -40,7 +40,7 @@ variable "log_analytics_retention_days" {
 variable "dbr_version" {
   description = "Databricks Runtime version for the sample cluster"
   type        = string
-  default     = "13.3.x-scala2.12"
+  default     = "14.3.x-scala2.12"
 }
 
 variable "enable_databricks" {
@@ -79,4 +79,3 @@ variable "databricks_token" {
   default     = ""
   sensitive   = true
 }
-

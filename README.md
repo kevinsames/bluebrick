@@ -16,8 +16,9 @@ Quick Start (30 minutes)
 -----------------------
 1) Fork the repo and clone locally.
 
-2) Create a Python virtual environment named `.venv` (optional, recommended):
+2) Use Python 3.10 and create a `.venv` (recommended):
 - macOS/Linux:
+  - Ensure Python 3.10 is active (for example, with pyenv: `pyenv install 3.10.14 && pyenv local 3.10.14`)
   - `python -m venv .venv && source .venv/bin/activate`
 - Windows PowerShell:
   - `python -m venv .venv; .\.venv\Scripts\Activate.ps1`
@@ -60,7 +61,7 @@ Configuration and Environments
 
 Local Development
 -----------------
-- Python 3.10+
+- Python 3.10+ (tested on 3.10 and 3.12 with Spark 3.5.x)
 - Optional: create a virtual environment
   - `python -m venv .venv && source .venv/bin/activate`
   - `pip install -r requirements.txt`
@@ -70,7 +71,15 @@ Local Development
 - Test:
   - `pytest -q`
 
-Note: Local tests use a lightweight Spark session (pyspark). Java is required on your machine.
+Note: Local tests use a lightweight Spark session (pyspark). Java (JDK 11) is required on your machine.
+
+
+Pre-commit Hooks
+----------------
+- Install hooks: `pre-commit install` (tools are included in `requirements.txt`).
+- Run on all files: `pre-commit run --all-files`.
+- Auto-fix on commit: Ruff runs with `--fix` and Black formats code. If files are modified, the commit is blocked; re-stage and commit again.
+- Update hook versions: `pre-commit autoupdate` (then commit the updated `.pre-commit-config.yaml`).
 
 
 CI/CD Overview

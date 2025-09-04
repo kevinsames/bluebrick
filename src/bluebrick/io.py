@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-import os
+import logging
 import re
-from typing import Optional, Tuple
 
 from pyspark.sql import DataFrame, SparkSession
 
@@ -16,12 +15,13 @@ def get_spark(app_name: str = "bluebrick") -> SparkSession:
 
     # Reuse an existing session if present
     try:
-        from pyspark.sql import SparkSession as _SS  # noqa: F401 (import to check availability)
         spark = SparkSession.getActiveSession()
         if spark is not None:
             return spark
-    except Exception:
-        pass
+    except Exception as exc:  # pragma: no cover - environment dependent
+        logging.getLogger(__name__).debug(
+            "No active SparkSession detected; creating a new one: %s", exc
+        )
 
     return (
         SparkSession.builder.master("local[1]")
@@ -31,7 +31,7 @@ def get_spark(app_name: str = "bluebrick") -> SparkSession:
     )
 
 
-def ensure_uc_names(catalog: str, schema: str, table: str) -> Tuple[str, str, str]:
+def ensure_uc_names(catalog: str, schema: str, table: str) -> tuple[str, str, str]:
     """Normalize UC catalog/schema/table names: lowercase and ``[a-z0-9_]+``.
 
     Raises ``ValueError`` if any component is empty after normalization.
@@ -54,7 +54,7 @@ def read_csv(
     path: str,
     *,
     header: bool = True,
-    schema: Optional[str] = None,
+    schema: str | None = None,
     infer_schema: bool = True,
 ) -> DataFrame:
     """Read a CSV file or directory with sensible defaults.
@@ -82,4 +82,3 @@ def write_delta(df: DataFrame, destination: str, *, mode: str = "overwrite") -> 
         df.write.format("delta").mode(mode).saveAsTable(destination)
     else:
         df.write.format("delta").mode(mode).save(destination)
-

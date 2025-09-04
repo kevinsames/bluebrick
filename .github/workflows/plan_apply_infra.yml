@@ -1,6 +1,7 @@
+---
 name: Terraform Plan / Apply (Infra)
 
-on:
+'on':
   workflow_dispatch:
     inputs:
       apply:
@@ -56,7 +57,9 @@ jobs:
         id: plan
         working-directory: infrastructure/terraform
         run: |
-          terraform plan -input=false -var-file=${{ github.event.inputs.tfvars_path || 'infrastructure/terraform/examples/terraform.tfvars.example' }} -out=tfplan
+          terraform plan -input=false \
+            -var-file="${{ github.event.inputs.tfvars_path }}" \
+            -out=tfplan
 
       - name: Upload Plan
         uses: actions/upload-artifact@v4
@@ -69,4 +72,3 @@ jobs:
         environment: production
         working-directory: infrastructure/terraform
         run: terraform apply -input=false tfplan
-

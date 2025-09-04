@@ -1,11 +1,17 @@
 # Databricks Python notebook: Quickstart ETL
 
-from pyspark.sql import functions as F
+try:
+    from IPython.display import display  # type: ignore
+except ImportError:
+
+    def display(_obj):  # type: ignore
+        # Fallback for non-notebook environments
+        pass
+
 
 from bluebrick.config import load_config
 from bluebrick.io import ensure_uc_names, get_spark, write_delta
 from bluebrick.transformations import clean_sales
-
 
 # 1) Spark session
 spark = get_spark("bluebrick-quickstart")
@@ -46,4 +52,3 @@ except Exception:
     print("Row count:", count_df.collect()[0][0])
     print("Schema:")
     print("\n".join([f"- {f.name}: {f.dataType}" for f in schema_df.schema.fields]))
-

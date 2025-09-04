@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import yaml
 
@@ -55,7 +55,7 @@ def _find_config_path(env: str) -> Path | None:
     return None
 
 
-def load_config(env: str | None = None) -> Dict[str, Any]:
+def load_config(env: str | None = None) -> dict[str, Any]:
     """Load BlueBrick configuration for the selected environment.
 
     Precedence:
@@ -84,4 +84,3 @@ def load_config(env: str | None = None) -> Dict[str, Any]:
         "raw_path": "abfss://raw@<adls-account-name>.dfs.core.windows.net/sales/",
         "silver_path": "abfss://silver@<adls-account-name>.dfs.core.windows.net/sales_silver/",
     }
-
