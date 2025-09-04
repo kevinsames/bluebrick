@@ -1,0 +1,72 @@
+name: Terraform Plan / Apply (Infra)
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: 'Apply changes (true/false)'
+        required: false
+        default: 'false'
+      tfvars_path:
+        description: 'Path to tfvars file'
+        required: false
+        default: 'infrastructure/terraform/examples/terraform.tfvars.example'
+  push:
+    paths:
+      - 'infrastructure/terraform/**'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    env:
+      TF_IN_AUTOMATION: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant-id: ${{ secrets.ARM_TENANT_ID }}
+          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+
+      - name: Terraform Init
+        working-directory: infrastructure/terraform
+        run: terraform init -input=false
+
+      - name: Terraform Format
+        working-directory: infrastructure/terraform
+        run: terraform fmt -check
+
+      - name: Terraform Validate
+        working-directory: infrastructure/terraform
+        run: terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        working-directory: infrastructure/terraform
+        run: |
+          terraform plan -input=false -var-file=${{ github.event.inputs.tfvars_path || 'infrastructure/terraform/examples/terraform.tfvars.example' }} -out=tfplan
+
+      - name: Upload Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan
+          path: infrastructure/terraform/tfplan
+
+      - name: Terraform Apply
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.apply == 'true' }}
+        environment: production
+        working-directory: infrastructure/terraform
+        run: terraform apply -input=false tfplan
+

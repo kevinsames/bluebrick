@@ -1,0 +1,30 @@
+# Naming and location
+prefix   = "bluebrick"
+location = "eastus"
+
+# Tags
+tags = {
+  project = "bluebrick"
+  env     = "dev"
+}
+
+# Workspace SKU
+workspace_sku = "premium"
+
+# Enable Diagnostic Settings + Log Analytics (optional)
+enable_log_analytics       = false
+log_analytics_retention_days = 30
+
+# Databricks provider auth (optional for workspace-scoped resources)
+enable_databricks = false
+databricks_host   = "https://adb-xxxxxxxxxxxxxxxx.xx.azuredatabricks.net"
+databricks_token  = "<pat>"
+
+# Unity Catalog example settings
+enable_uc  = false
+uc_catalog = "main"
+uc_schema  = "bluebrick_dev"
+
+# Databricks Runtime for the sample cluster
+dbr_version = "13.3.x-scala2.12"
+

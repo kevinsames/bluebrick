@@ -1,0 +1,8 @@
+catalog: main
+schema: bluebrick_prod
+table: example_sales
+adls_account: "<adls-account-name>"
+adls_container: "raw"
+raw_path: "abfss://raw@<adls-account-name>.dfs.core.windows.net/sales/"
+silver_path: "abfss://silver@<adls-account-name>.dfs.core.windows.net/sales_silver/"
+
