@@ -257,3 +257,4 @@ resource "azurerm_private_endpoint" "sa_dfs" {
     private_dns_zone_ids = [azurerm_private_dns_zone.dfs[0].id]
   }
 }
+

@@ -135,6 +135,7 @@ resource "azurerm_databricks_workspace" "bluebrick" {
   dynamic "custom_parameters" {
     for_each = var.enable_hub_spoke && var.enable_vnet_injection ? [1] : []
     content {
+      virtual_network_id = azurerm_virtual_network.spoke_dbx[0].id
       vnet_address_prefix = var.spoke_dbx_address_space
       public_subnet_name  = azurerm_subnet.dbx_public[0].name
       private_subnet_name = azurerm_subnet.dbx_private[0].name
@@ -162,11 +163,6 @@ resource "azurerm_monitor_diagnostic_setting" "dbw" {
 
   enabled_log {
     category = "accounts"
-  }
-
-  metric {
-    category = "AllMetrics"
-    enabled  = true
   }
 }
 
@@ -250,6 +246,10 @@ resource "azurerm_data_factory" "env" {
   resource_group_name = azurerm_resource_group.env_app.name
   tags                = var.tags
 
+  identity {
+    type = "SystemAssigned"
+  }
+
   dynamic "github_configuration" {
     for_each = var.enable_adf && var.enable_adf_github && var.github_account_name != "" ? [1] : []
     content {
@@ -269,25 +269,13 @@ resource "azurerm_data_factory" "hub" {
   location            = azurerm_resource_group.hub[0].location
   resource_group_name = azurerm_resource_group.hub[0].name
   tags                = merge(var.tags, { environment = "hub", env = "hub" })
-}
 
-resource "azurerm_data_factory_integration_runtime_self_hosted" "hub_shir" {
-  count            = var.enable_adf ? 1 : 0
-  name             = "shir-${var.project}-hub"
-  data_factory_id  = azurerm_data_factory.hub[0].id
-  description      = "Self-hosted IR registered in Hub ADF for cross-env use"
-}
-
-resource "azurerm_data_factory_integration_runtime_self_hosted" "env_linked_shir" {
-  count            = var.enable_adf ? 1 : 0
-  name             = "shir-linked-${local.prefix}"
-  data_factory_id  = azurerm_data_factory.env[0].id
-  description      = "Linked Self-hosted IR referencing Hub ADF IR"
-
-  rbac_authorization {
-    resource_id = azurerm_data_factory_integration_runtime_self_hosted.hub_shir[0].id
+  identity {
+    type = "SystemAssigned"
   }
 }
+
+ 
 
 
 output "adf_env_name" {
@@ -300,7 +288,4 @@ output "adf_hub_name" {
   description = "Hub Data Factory name"
 }
 
-output "adf_hub_shir_id" {
-  value       = var.enable_adf ? azurerm_data_factory_integration_runtime_self_hosted.hub_shir[0].id : null
-  description = "Resource ID of the Hub Self-hosted Integration Runtime"
-}
+ 
