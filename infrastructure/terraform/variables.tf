@@ -81,7 +81,7 @@ variable "uc_catalog" {
 variable "uc_schema" {
   description = "Unity Catalog schema name for examples"
   type        = string
-  default     = "bluebrick_dev"
+  default     = "bluebrick"
 }
 
 variable "databricks_host" {

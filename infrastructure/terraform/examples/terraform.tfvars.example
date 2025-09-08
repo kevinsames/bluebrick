@@ -36,7 +36,7 @@ enable_instance_pool = false
 # Unity Catalog example settings
 enable_uc  = false
 uc_catalog = "main"
-uc_schema  = "bluebrick_dev"
+uc_schema  = "bluebrick"
 
 # Databricks Runtime for the sample cluster
 dbr_version = "14.3.x-scala2.12"
