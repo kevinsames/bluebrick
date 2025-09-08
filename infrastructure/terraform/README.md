@@ -11,6 +11,10 @@ BlueBrick template:
 - Optional: Hub-and-Spoke networking with VNet peering and Storage private endpoints
 - Optional: Azure Data Factory (one per environment + one in Hub for Integration Runtimes)
 
+Diagram
+- A high-level architecture diagram is available at `docs/assets/diagram.drawio`.
+  Open it in diagrams.net/draw.io to view or edit.
+
 Notes
 - Databricks workspace-level resources are behind a feature flag (`enable_databricks`)
   and require authenticating the Databricks provider (either via PAT or Azure auth).

@@ -1,0 +1,159 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Safari/605.1.15" version="28.2.0">
+  <diagram id="EsaaQ3VmLVuPnzCaOx-a" name="High Level Diagram">
+    <mxGraphModel dx="1410" dy="820" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1F5FE;strokeColor=#0288D1;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="430" y="540" width="1120" height="720" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-2" value="Azure Subscription" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#0288D1;" vertex="1" parent="1">
+          <mxGeometry x="440" y="550" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-3" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FF8F00;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="470" y="620" width="320" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-4" value="Hub Resource Group&#xa;rg-bluebrick-hub" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;fontColor=#FF8F00;" vertex="1" parent="1">
+          <mxGeometry x="480" y="630" width="160" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-5" value="Hub VNet&#xa;vnet-bluebrick-hub&#xa;10.0.0.0/16" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E8;strokeColor=#4CAF50;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="490" y="670" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-6" value="Key Vault&#xa;kv-bluebrick-hub" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#9C27B0;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="640" y="670" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-7" value="Data Factory&#xa;adf-bluebrick-hub" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#FFA000;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="490" y="750" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-8" value="Private DNS Zones&#xa;• blob.core.windows.net&#xa;• dfs.core.windows.net" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#2196F3;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="640" y="750" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-9" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1F8E9;strokeColor=#689F38;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="870" y="620" width="640" height="600" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-10" value="Development Environment" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#689F38;" vertex="1" parent="1">
+          <mxGeometry x="880" y="630" width="200" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-11" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FDE7F3;strokeColor=#E91E63;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="890" y="660" width="280" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-12" value="App Resource Group&#xa;rg-bluebrick-dev-app" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;fontColor=#E91E63;" vertex="1" parent="1">
+          <mxGeometry x="900" y="670" width="160" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-13" value="Databricks Workspace&#xa;dbx-bluebrick-dev&#xa;(Premium)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF6B35;strokeColor=#D84315;strokeWidth=2;fontColor=white;" vertex="1" parent="1">
+          <mxGeometry x="910" y="710" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-14" value="Data Factory&#xa;adf-bluebrick-dev" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#FFA000;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="910" y="780" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-15" value="Storage Account&#xa;stbluebrickdev60rd&#xa;(Data Lake Gen2)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E8;strokeColor=#4CAF50;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1070" y="710" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-16" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#3F51B5;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="1210" y="660" width="280" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-17" value="Shared Resource Group&#xa;rg-bluebrick-dev-shared" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;fontColor=#3F51B5;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="670" width="180" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-18" value="Key Vault&#xa;kv-bluebrick-dev" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#9C27B0;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1230" y="710" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-19" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FF8F00;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="890" y="900" width="600" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-20" value="Infrastructure Resource Group - rg-bluebrick-dev-infra" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;fontColor=#FF8F00;" vertex="1" parent="1">
+          <mxGeometry x="900" y="910" width="300" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-21" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E8;strokeColor=#4CAF50;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="910" y="940" width="160" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-22" value="Data Spoke VNet&#xa;vnet-bluebrick-dev-data&#xa;10.1.0.0/16" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontStyle=1;fontColor=#4CAF50;" vertex="1" parent="1">
+          <mxGeometry x="930" y="980" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-23" value="Private Endpoint&#xa;Subnet&#xa;10.1.0.0/24" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFECB3;strokeColor=#FF8F00;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="920" y="1020" width="90" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-24" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#F44336;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="1110" y="940" width="200" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-25" value="Databricks Spoke VNet&#xa;vnet-bluebrick-dev-dbx&#xa;10.2.0.0/16" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=10;fontStyle=1;fontColor=#F44336;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="950" width="140" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-26" value="DBX Public&#xa;10.2.0.0/24" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#F44336;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="990" width="80" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-27" value="DBX Private&#xa;10.2.1.0/24" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#F44336;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="1210" y="990" width="80" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-28" value="Log Analytics&#xa;log-bluebrick-dev" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1F5FE;strokeColor=#0288D1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="910" y="1080" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-29" value="Network Security Groups&#xa;• nsg-bluebrick-dev-dbx-public&#xa;• nsg-bluebrick-dev-dbx-private" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFECB3;strokeColor=#FF8F00;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1330" y="940" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-30" value="Storage Containers&#xa;• bronze, silver, gold&#xa;• config, logs, metadata&#xa;• coal (raw)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#4CAF50;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="1070" y="780" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-31" style="endArrow=classic;startArrow=classic;html=1;strokeColor=#2196F3;strokeWidth=2;dashed=1;" edge="1" parent="1" source="U-Kj8mkNVa3aP176_mlK-5" target="U-Kj8mkNVa3aP176_mlK-21">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="790" y="800" as="sourcePoint" />
+            <mxPoint x="840" y="750" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="690" y="700" />
+              <mxPoint x="830" y="700" />
+              <mxPoint x="830" y="1000" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-32" value="VNet Peering" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=9;fontColor=#2196F3;" vertex="1" parent="1">
+          <mxGeometry x="750" y="690" width="60" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-33" style="endArrow=classic;startArrow=classic;html=1;strokeColor=#2196F3;strokeWidth=2;dashed=1;" edge="1" parent="1" source="U-Kj8mkNVa3aP176_mlK-5" target="U-Kj8mkNVa3aP176_mlK-24">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="790" y="850" as="sourcePoint" />
+            <mxPoint x="840" y="800" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="690" y="700" />
+              <mxPoint x="850" y="700" />
+              <mxPoint x="850" y="880" />
+              <mxPoint x="1210" y="880" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-34" style="endArrow=classic;html=1;strokeColor=#9C27B0;strokeWidth=2;dashed=1;" edge="1" parent="1" source="U-Kj8mkNVa3aP176_mlK-23" target="U-Kj8mkNVa3aP176_mlK-15">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1040" y="900" as="sourcePoint" />
+            <mxPoint x="1090" y="850" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1030" y="1035" />
+              <mxPoint x="1030" y="900" />
+              <mxPoint x="1140" y="900" />
+              <mxPoint x="1140" y="770" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-35" value="Private Endpoints" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=9;fontColor=#9C27B0;" vertex="1" parent="1">
+          <mxGeometry x="1035" y="880" width="70" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-36" style="endArrow=classic;html=1;strokeColor=#FF5722;strokeWidth=2;" edge="1" parent="1" source="U-Kj8mkNVa3aP176_mlK-13" target="U-Kj8mkNVa3aP176_mlK-15">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1040" y="780" as="sourcePoint" />
+            <mxPoint x="1090" y="730" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-37" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#BDBDBD;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="470" y="950" width="320" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-38" value="Legend" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="480" y="960" width="60" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-39" value="🔷 Hub-and-Spoke Architecture&#xa;🔹 VNet Peering (Bidirectional)&#xa;🟣 Private Endpoints&#xa;🔶 Data Lake Storage (ADLS Gen2)&#xa;🔺 Databricks Premium Workspace&#xa;🔵 Azure Data Factory&#xa;🟢 Key Vaults (Hub + Dev)&#xa;🟠 Network Security Groups&#xa;📊 Log Analytics + Monitoring" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="480" y="985" width="300" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="U-Kj8mkNVa3aP176_mlK-40" value="Bluebrick Azure Data Platform - High Level Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#1976D2;" vertex="1" parent="1">
+          <mxGeometry x="790" y="580" width="400" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
