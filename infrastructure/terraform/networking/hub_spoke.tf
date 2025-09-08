@@ -3,9 +3,10 @@
 ###############################################
 
 locals {
-  hub_name         = "vnet-${var.prefix}-hub"
-  spoke_data_name  = "vnet-${var.prefix}-data"
-  spoke_dbx_name   = "vnet-${var.prefix}-dbx"
+  # Hub VNet name should not include environment or use the computed prefix
+  hub_name         = "vnet-${var.project}-hub"
+  spoke_data_name  = "vnet-${local.prefix}-data"
+  spoke_dbx_name   = "vnet-${local.prefix}-dbx"
 }
 
 resource "azurerm_virtual_network" "hub" {
@@ -46,7 +47,7 @@ resource "azurerm_virtual_network" "spoke_dbx" {
 
 resource "azurerm_network_security_group" "dbx_public" {
   count               = var.enable_hub_spoke ? 1 : 0
-  name                = "nsg-${var.prefix}-dbx-public"
+  name                = "nsg-${local.prefix}-dbx-public"
   location            = azurerm_resource_group.bluebrick.location
   resource_group_name = azurerm_resource_group.bluebrick.name
   tags                = var.tags
@@ -54,7 +55,7 @@ resource "azurerm_network_security_group" "dbx_public" {
 
 resource "azurerm_network_security_group" "dbx_private" {
   count               = var.enable_hub_spoke ? 1 : 0
-  name                = "nsg-${var.prefix}-dbx-private"
+  name                = "nsg-${local.prefix}-dbx-private"
   location            = azurerm_resource_group.bluebrick.location
   resource_group_name = azurerm_resource_group.bluebrick.name
   tags                = var.tags
@@ -217,7 +218,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "dfs_spoke_data" {
 # Private Endpoints for Storage Account (Blob + DFS)
 resource "azurerm_private_endpoint" "sa_blob" {
   count               = var.enable_hub_spoke ? 1 : 0
-  name                = "pep-${var.prefix}-blob"
+  name                = "pep-${local.prefix}-blob"
   location            = azurerm_resource_group.bluebrick.location
   resource_group_name = azurerm_resource_group.bluebrick.name
   subnet_id           = azurerm_subnet.spoke_data_pep[0].id
@@ -237,7 +238,7 @@ resource "azurerm_private_endpoint" "sa_blob" {
 
 resource "azurerm_private_endpoint" "sa_dfs" {
   count               = var.enable_hub_spoke ? 1 : 0
-  name                = "pep-${var.prefix}-dfs"
+  name                = "pep-${local.prefix}-dfs"
   location            = azurerm_resource_group.bluebrick.location
   resource_group_name = azurerm_resource_group.bluebrick.name
   subnet_id           = azurerm_subnet.spoke_data_pep[0].id

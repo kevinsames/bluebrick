@@ -1,11 +1,23 @@
 # Naming and location
-prefix   = "bluebrick"
-location = "West Europe"
+environment  = "dev"
+project      = "bluebrick"
+location     = "West Europe"
 
 # Tags
 tags = {
-  project = "bluebrick"
-  env     = "dev"
+  project        = "bluebrick"
+  environment    = "dev"
+  location       = "West Europe"
+  owner          = "team-bluebrick@example.com"
+  contact        = "platform-ops@example.com"
+  cost_center    = "CC-12345"
+  business_unit  = "DataEngineering"
+  application    = "bluebrick"
+  managed_by     = "platform-team"
+  created_by     = "kevin"
+  created_on     = "YYYY-MM-DD"
+  lifecycle      = "development"
+  compliance     = "non-prod"
 }
 
 # Workspace SKU
@@ -41,3 +53,10 @@ hub_subscription_id = ""
 
 # Azure Data Factory
 enable_adf = false
+
+# Optional: Link the env ADF to this GitHub repo for dev authoring
+enable_adf_github   = false
+github_account_name = "<org-or-user>"
+github_repository_name = "bluebrick"
+github_branch       = "main"
+github_root_folder  = "data-factory"

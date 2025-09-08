@@ -26,6 +26,7 @@ spark-warehouse/
 
 # Terraform
 .terraform/
+.terraform.lock.hcl
 *.tfstate
 *.tfstate.*
 crash.log

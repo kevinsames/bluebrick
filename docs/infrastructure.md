@@ -4,7 +4,7 @@ This repo provisions Azure + Databricks with Terraform.
 
 ## Components
 
-- Resource group, storage (ADLS Gen2 with HNS), containers: `coal` (raw landing) and optional `silver`
+- Resource group, storage (ADLS Gen2 with HNS), containers: `coal`, `bronze`, `silver`, `gold`, `metadata`, `logs`, `config`
 - Databricks workspace (SKU configurable)
 - Optional:
   - Log Analytics + diagnostics
@@ -41,4 +41,3 @@ Key variables (see `infrastructure/terraform/variables.tf`):
 - Storage account and container URLs
 - Databricks workspace URL
 - ADF names and SHIR resource ID (when enabled)
-

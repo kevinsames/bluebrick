@@ -4,7 +4,7 @@ This Terraform stack provisions a minimal Azure + Databricks foundation for the
 BlueBrick template:
 
 - Azure Resource Group
-- Azure Data Lake Storage Gen2 (StorageV2 with HNS), containers: `coal` (raw landing), `silver` (optional)
+- Azure Data Lake Storage Gen2 (StorageV2 with HNS), containers: `coal`, `bronze`, `silver`, `gold`, `metadata`, `logs`, `config`
 - Azure Databricks Workspace (SKU configurable)
 - Optional: Log Analytics + Diagnostic Settings
 - Optional: Databricks workspace-level resources (cluster, example UC grants)

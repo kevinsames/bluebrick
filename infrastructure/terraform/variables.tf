@@ -1,7 +1,13 @@
-variable "prefix" {
-  description = "Name prefix for all resources"
+variable "project" {
+  description = "Project name (e.g., bluebrick)"
   type        = string
   default     = "bluebrick"
+}
+
+variable "environment" {
+  description = "Deployment environment (e.g., dev, test, prod, hub)"
+  type        = string
+  default     = "dev"
 }
 
 variable "location" {
@@ -13,9 +19,14 @@ variable "location" {
 variable "tags" {
   description = "Resource tags"
   type        = map(string)
-  default     = {
-    project = "bluebrick"
-    env     = "dev"
+  default = {
+    project      = "bluebrick"
+    env          = "dev"
+    environment  = "dev"
+    owner        = "platform-team"
+    cost_center  = "bluebrick"
+    created_by   = "terraform"
+    contact      = ""
   }
 }
 
@@ -98,6 +109,36 @@ variable "enable_adf" {
   description = "Provision Azure Data Factory (one per environment + one in Hub for Integration Runtimes)"
   type        = bool
   default     = false
+}
+
+variable "enable_adf_github" {
+  description = "Enable GitHub integration for the dev (environment) Data Factory"
+  type        = bool
+  default     = false
+}
+
+variable "github_account_name" {
+  description = "GitHub org/user that hosts the repository"
+  type        = string
+  default     = ""
+}
+
+variable "github_repository_name" {
+  description = "GitHub repository name"
+  type        = string
+  default     = "bluebrick"
+}
+
+variable "github_branch" {
+  description = "GitHub branch for ADF authoring (dev)"
+  type        = string
+  default     = "main"
+}
+
+variable "github_root_folder" {
+  description = "Root folder within the repo for ADF code"
+  type        = string
+  default     = "data-factory"
 }
 
 
