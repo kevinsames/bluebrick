@@ -13,7 +13,6 @@ provider "azurerm" {
 # Hub subscription alias for cross-subscription deployments (Hub & Spoke)
 provider "azurerm" {
   alias           = "hub"
-  features        = {}
   subscription_id = var.hub_subscription_id
 }
 

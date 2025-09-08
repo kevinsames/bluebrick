@@ -1,6 +1,6 @@
 # Naming and location
 prefix   = "bluebrick"
-location = "eastus"
+location = "West Europe"
 
 # Tags
 tags = {
@@ -41,8 +41,3 @@ hub_subscription_id = ""
 
 # Azure Data Factory
 enable_adf = false
-enable_adf_github      = false
-github_account_name    = "<your-org-or-user>"
-github_repository_name = "bluebrick"
-github_branch          = "main"
-github_root_folder     = "data-factory"

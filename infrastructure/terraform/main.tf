@@ -39,7 +39,7 @@ resource "azurerm_storage_account" "bluebrick" {
   account_tier                    = "Standard"
   account_replication_type        = "LRS"
   account_kind                    = "StorageV2"
-  enable_https_traffic_only       = true
+  https_traffic_only_enabled       = true
   is_hns_enabled                  = true
   min_tls_version                 = "TLS1_2"
   allow_nested_items_to_be_public = false
@@ -48,13 +48,13 @@ resource "azurerm_storage_account" "bluebrick" {
 
 resource "azurerm_storage_container" "raw" {
   name                  = local.raw_name
-  storage_account_name  = azurerm_storage_account.bluebrick.name
+  storage_account_id  = azurerm_storage_account.bluebrick.id
   container_access_type = "private"
 }
 
 resource "azurerm_storage_container" "silver" {
   name                  = local.silver_name
-  storage_account_name  = azurerm_storage_account.bluebrick.name
+  storage_account_id    = azurerm_storage_account.bluebrick.id
   container_access_type = "private"
 }
 
@@ -93,14 +93,12 @@ resource "azurerm_monitor_diagnostic_setting" "dbw" {
   target_resource_id         = azurerm_databricks_workspace.bluebrick.id
   log_analytics_workspace_id = azurerm_log_analytics_workspace.bluebrick[0].id
 
-  log {
+  enabled_log {
     category = "accounts"
-    enabled  = true
   }
 
-  metric {
+  enabled_metric {
     category = "AllMetrics"
-    enabled  = true
   }
 }
 
@@ -132,16 +130,6 @@ resource "azurerm_data_factory" "env" {
   resource_group_name = azurerm_resource_group.bluebrick.name
   tags                = var.tags
 
-  dynamic "github_configuration" {
-    for_each = var.enable_adf && var.enable_adf_github && var.github_account_name != "" ? [1] : []
-    content {
-      account_name    = var.github_account_name
-      branch_name     = var.github_branch
-      repository_name = var.github_repository_name
-      root_folder     = var.github_root_folder
-      git_url         = "https://github.com"
-    }
-  }
 }
 
 resource "azurerm_data_factory" "hub" {
@@ -153,20 +141,6 @@ resource "azurerm_data_factory" "hub" {
   tags                = var.tags
 }
 
-resource "azurerm_data_factory_integration_runtime_self_hosted" "hub_shir" {
-  count          = var.enable_adf ? 1 : 0
-  name           = "shir-${var.prefix}"
-  data_factory_id = azurerm_data_factory.hub[0].id
-  description    = "Self-hosted IR registered in Hub ADF for cross-env use"
-}
-
-resource "azurerm_data_factory_integration_runtime_self_hosted" "env_linked_shir" {
-  count          = var.enable_adf ? 1 : 0
-  name           = "shir-linked-${var.prefix}"
-  data_factory_id = azurerm_data_factory.env[0].id
-  description    = "Linked Self-hosted IR referencing Hub ADF IR"
-  linked_self_hosted_integration_runtime_id = azurerm_data_factory_integration_runtime_self_hosted.hub_shir[0].id
-}
 
 output "adf_env_name" {
   value       = var.enable_adf ? azurerm_data_factory.env[0].name : null
@@ -176,9 +150,4 @@ output "adf_env_name" {
 output "adf_hub_name" {
   value       = var.enable_adf ? azurerm_data_factory.hub[0].name : null
   description = "Hub Data Factory name"
-}
-
-output "adf_hub_shir_id" {
-  value       = var.enable_adf ? azurerm_data_factory_integration_runtime_self_hosted.hub_shir[0].id : null
-  description = "Resource ID of the Hub Self-hosted Integration Runtime"
 }

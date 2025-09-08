@@ -28,7 +28,8 @@ Usage
    ```
 4. Apply (when ready):
    ```bash
-  terraform -chdir=infrastructure/terraform apply -var-file=examples/terraform.tfvars.example
+   terraform -chdir=infrastructure/terraform apply -var-file=examples/terraform.tfvars.example
+   ```
 
 Multi-subscription (Hub & Spoke)
 - Use a single Service Principal with RBAC in all subscriptions (Hub + each Spoke env).
@@ -60,4 +61,3 @@ Data Layers
 - Bronze: Unity Catalog managed Delta tables. Append-only; no deletes. 1:1 with coal artifacts but typed, deduplicated, with metadata columns. Optionally preserve history (SCD2).
 - Silver: Unity Catalog managed Delta tables enriched with business logic and standardization.
 - Gold: Unity Catalog managed Delta tables serving downstream use cases; one schema per use case with read/write permissions per interface contract.
-   ```
