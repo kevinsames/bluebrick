@@ -16,14 +16,14 @@ resource "azurerm_virtual_network" "hub" {
   location            = azurerm_resource_group.hub[0].location
   resource_group_name = azurerm_resource_group.hub[0].name
   address_space       = [var.hub_address_space]
-  tags                = var.tags
+  tags                = merge(var.tags, { environment = "hub", env = "hub" })
 }
 
 resource "azurerm_virtual_network" "spoke_data" {
   count               = var.enable_hub_spoke ? 1 : 0
   name                = local.spoke_data_name
-  location            = azurerm_resource_group.bluebrick.location
-  resource_group_name = azurerm_resource_group.bluebrick.name
+  location            = azurerm_resource_group.env_infra.location
+  resource_group_name = azurerm_resource_group.env_infra.name
   address_space       = [var.spoke_data_address_space]
   tags                = var.tags
 }
@@ -31,7 +31,7 @@ resource "azurerm_virtual_network" "spoke_data" {
 resource "azurerm_subnet" "spoke_data_pep" {
   count                = var.enable_hub_spoke ? 1 : 0
   name                 = "pep-subnet"
-  resource_group_name  = azurerm_resource_group.bluebrick.name
+  resource_group_name  = azurerm_resource_group.env_infra.name
   virtual_network_name = azurerm_virtual_network.spoke_data[0].name
   address_prefixes     = [cidrsubnet(var.spoke_data_address_space, 8, 0)]
 }
@@ -39,8 +39,8 @@ resource "azurerm_subnet" "spoke_data_pep" {
 resource "azurerm_virtual_network" "spoke_dbx" {
   count               = var.enable_hub_spoke ? 1 : 0
   name                = local.spoke_dbx_name
-  location            = azurerm_resource_group.bluebrick.location
-  resource_group_name = azurerm_resource_group.bluebrick.name
+  location            = azurerm_resource_group.env_infra.location
+  resource_group_name = azurerm_resource_group.env_infra.name
   address_space       = [var.spoke_dbx_address_space]
   tags                = var.tags
 }
@@ -48,23 +48,23 @@ resource "azurerm_virtual_network" "spoke_dbx" {
 resource "azurerm_network_security_group" "dbx_public" {
   count               = var.enable_hub_spoke ? 1 : 0
   name                = "nsg-${local.prefix}-dbx-public"
-  location            = azurerm_resource_group.bluebrick.location
-  resource_group_name = azurerm_resource_group.bluebrick.name
+  location            = azurerm_resource_group.env_infra.location
+  resource_group_name = azurerm_resource_group.env_infra.name
   tags                = var.tags
 }
 
 resource "azurerm_network_security_group" "dbx_private" {
   count               = var.enable_hub_spoke ? 1 : 0
   name                = "nsg-${local.prefix}-dbx-private"
-  location            = azurerm_resource_group.bluebrick.location
-  resource_group_name = azurerm_resource_group.bluebrick.name
+  location            = azurerm_resource_group.env_infra.location
+  resource_group_name = azurerm_resource_group.env_infra.name
   tags                = var.tags
 }
 
 resource "azurerm_subnet" "dbx_public" {
   count                = var.enable_hub_spoke ? 1 : 0
   name                 = "dbx-public"
-  resource_group_name  = azurerm_resource_group.bluebrick.name
+  resource_group_name  = azurerm_resource_group.env_infra.name
   virtual_network_name = azurerm_virtual_network.spoke_dbx[0].name
   address_prefixes     = [cidrsubnet(var.spoke_dbx_address_space, 8, 0)]
 
@@ -84,7 +84,7 @@ resource "azurerm_subnet" "dbx_public" {
 resource "azurerm_subnet" "dbx_private" {
   count                = var.enable_hub_spoke ? 1 : 0
   name                 = "dbx-private"
-  resource_group_name  = azurerm_resource_group.bluebrick.name
+  resource_group_name  = azurerm_resource_group.env_infra.name
   virtual_network_name = azurerm_virtual_network.spoke_dbx[0].name
   address_prefixes     = [cidrsubnet(var.spoke_dbx_address_space, 8, 1)]
 
@@ -130,7 +130,7 @@ resource "azurerm_virtual_network_peering" "hub_to_data" {
 resource "azurerm_virtual_network_peering" "data_to_hub" {
   count                         = var.enable_hub_spoke ? 1 : 0
   name                          = "peer-data-to-hub"
-  resource_group_name           = azurerm_resource_group.bluebrick.name
+  resource_group_name           = azurerm_resource_group.env_infra.name
   virtual_network_name          = azurerm_virtual_network.spoke_data[0].name
   remote_virtual_network_id     = azurerm_virtual_network.hub[0].id
   allow_virtual_network_access  = true
@@ -155,7 +155,7 @@ resource "azurerm_virtual_network_peering" "hub_to_dbx" {
 resource "azurerm_virtual_network_peering" "dbx_to_hub" {
   count                         = var.enable_hub_spoke ? 1 : 0
   name                          = "peer-dbx-to-hub"
-  resource_group_name           = azurerm_resource_group.bluebrick.name
+  resource_group_name           = azurerm_resource_group.env_infra.name
   virtual_network_name          = azurerm_virtual_network.spoke_dbx[0].name
   remote_virtual_network_id     = azurerm_virtual_network.hub[0].id
   allow_virtual_network_access  = true
@@ -170,6 +170,7 @@ resource "azurerm_private_dns_zone" "blob" {
   provider            = azurerm.hub
   name                = "privatelink.blob.core.windows.net"
   resource_group_name = azurerm_resource_group.hub[0].name
+  tags                = merge(var.tags, { environment = "hub", env = "hub" })
 }
 
 resource "azurerm_private_dns_zone" "dfs" {
@@ -177,6 +178,7 @@ resource "azurerm_private_dns_zone" "dfs" {
   provider            = azurerm.hub
   name                = "privatelink.dfs.core.windows.net"
   resource_group_name = azurerm_resource_group.hub[0].name
+  tags                = merge(var.tags, { environment = "hub", env = "hub" })
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "blob_hub" {
@@ -219,8 +221,8 @@ resource "azurerm_private_dns_zone_virtual_network_link" "dfs_spoke_data" {
 resource "azurerm_private_endpoint" "sa_blob" {
   count               = var.enable_hub_spoke ? 1 : 0
   name                = "pep-${local.prefix}-blob"
-  location            = azurerm_resource_group.bluebrick.location
-  resource_group_name = azurerm_resource_group.bluebrick.name
+  location            = azurerm_resource_group.env_infra.location
+  resource_group_name = azurerm_resource_group.env_infra.name
   subnet_id           = azurerm_subnet.spoke_data_pep[0].id
 
   private_service_connection {
@@ -239,8 +241,8 @@ resource "azurerm_private_endpoint" "sa_blob" {
 resource "azurerm_private_endpoint" "sa_dfs" {
   count               = var.enable_hub_spoke ? 1 : 0
   name                = "pep-${local.prefix}-dfs"
-  location            = azurerm_resource_group.bluebrick.location
-  resource_group_name = azurerm_resource_group.bluebrick.name
+  location            = azurerm_resource_group.env_infra.location
+  resource_group_name = azurerm_resource_group.env_infra.name
   subnet_id           = azurerm_subnet.spoke_data_pep[0].id
 
   private_service_connection {

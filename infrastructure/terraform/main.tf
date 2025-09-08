@@ -13,8 +13,8 @@ locals {
   prefix = "${var.project}-${var.environment}"
 }
 
-resource "azurerm_resource_group" "bluebrick" {
-  name     = "rg-${local.prefix}"
+resource "azurerm_resource_group" "env_infra" {
+  name     = "rg-${local.prefix}-infra"
   location = var.location
   tags     = var.tags
 }
@@ -25,13 +25,25 @@ resource "azurerm_resource_group" "hub" {
   provider = azurerm.hub
   name     = "rg-${var.project}-hub"
   location = var.location
+  tags     = merge(var.tags, { environment = "hub", env = "hub" })
+}
+
+resource "azurerm_resource_group" "env_shared" {
+  name     = "rg-${local.prefix}-shared"
+  location = var.location
+  tags     = var.tags
+}
+
+resource "azurerm_resource_group" "env_app" {
+  name     = "rg-${local.prefix}-app"
+  location = var.location
   tags     = var.tags
 }
 
 resource "azurerm_storage_account" "bluebrick" {
   name                            = substr(replace(lower("st${local.prefix}${random_string.suffix.result}"), "-", ""), 0, 24)
-  resource_group_name             = azurerm_resource_group.bluebrick.name
-  location                        = azurerm_resource_group.bluebrick.location
+  resource_group_name             = azurerm_resource_group.env_app.name
+  location                        = azurerm_resource_group.env_app.location
   account_tier                    = "Standard"
   account_replication_type        = "LRS"
   account_kind                    = "StorageV2"
@@ -86,8 +98,8 @@ resource "azurerm_storage_container" "config" {
 
 resource "azurerm_key_vault" "bluebrick" {
   name                          = "kv-${local.prefix}"
-  location                      = azurerm_resource_group.bluebrick.location
-  resource_group_name           = azurerm_resource_group.bluebrick.name
+  location                      = azurerm_resource_group.env_shared.location
+  resource_group_name           = azurerm_resource_group.env_shared.name
   tenant_id                     = data.azurerm_client_config.current.tenant_id
   sku_name                      = "standard"
   enable_rbac_authorization     = true
@@ -97,10 +109,25 @@ resource "azurerm_key_vault" "bluebrick" {
   tags                          = var.tags
 }
 
+resource "azurerm_key_vault" "hub" {
+  count                         = var.enable_hub_spoke ? 1 : 0
+  provider                      = azurerm.hub
+  name                          = "kv-${var.project}-hub"
+  location                      = azurerm_resource_group.hub[0].location
+  resource_group_name           = azurerm_resource_group.hub[0].name
+  tenant_id                     = data.azurerm_client_config.current.tenant_id
+  sku_name                      = "standard"
+  enable_rbac_authorization     = true
+  purge_protection_enabled      = true
+  soft_delete_retention_days    = 7
+  public_network_access_enabled = true
+  tags                          = merge(var.tags, { environment = "hub", env = "hub" })
+}
+
 resource "azurerm_databricks_workspace" "bluebrick" {
   name                = "dbx-${local.prefix}"
-  resource_group_name = azurerm_resource_group.bluebrick.name
-  location            = azurerm_resource_group.bluebrick.location
+  resource_group_name = azurerm_resource_group.env_app.name
+  location            = azurerm_resource_group.env_app.location
   sku                 = var.workspace_sku
   managed_resource_group_name = "databricks-mrg-${local.prefix}"
   tags                = var.tags
@@ -120,8 +147,8 @@ resource "azurerm_databricks_workspace" "bluebrick" {
 resource "azurerm_log_analytics_workspace" "bluebrick" {
   count               = var.enable_log_analytics ? 1 : 0
   name                = "log-${local.prefix}"
-  location            = azurerm_resource_group.bluebrick.location
-  resource_group_name = azurerm_resource_group.bluebrick.name
+  location            = azurerm_resource_group.env_infra.location
+  resource_group_name = azurerm_resource_group.env_infra.name
   sku                 = "PerGB2018"
   retention_in_days   = var.log_analytics_retention_days
   tags                = var.tags
@@ -144,7 +171,23 @@ resource "azurerm_monitor_diagnostic_setting" "dbw" {
 }
 
 output "resource_group_name" {
-  value = azurerm_resource_group.bluebrick.name
+  value       = azurerm_resource_group.env_app.name
+  description = "Application resource group name (backward-compatible)"
+}
+
+output "resource_group_app_name" {
+  value       = azurerm_resource_group.env_app.name
+  description = "Application resource group name"
+}
+
+output "resource_group_shared_name" {
+  value       = azurerm_resource_group.env_shared.name
+  description = "Shared resource group name (e.g., Key Vault)"
+}
+
+output "resource_group_infra_name" {
+  value       = azurerm_resource_group.env_infra.name
+  description = "Infrastructure resource group name (e.g., VNets, monitoring)"
 }
 
 output "storage_account_name" {
@@ -155,8 +198,28 @@ output "raw_container_url" {
   value = "https://${azurerm_storage_account.bluebrick.name}.blob.core.windows.net/${azurerm_storage_container.raw.name}"
 }
 
+output "bronze_container_url" {
+  value = "https://${azurerm_storage_account.bluebrick.name}.blob.core.windows.net/${azurerm_storage_container.bronze.name}"
+}
+
 output "silver_container_url" {
   value = "https://${azurerm_storage_account.bluebrick.name}.blob.core.windows.net/${azurerm_storage_container.silver.name}"
+}
+
+output "gold_container_url" {
+  value = "https://${azurerm_storage_account.bluebrick.name}.blob.core.windows.net/${azurerm_storage_container.gold.name}"
+}
+
+output "metadata_container_url" {
+  value = "https://${azurerm_storage_account.bluebrick.name}.blob.core.windows.net/${azurerm_storage_container.metadata.name}"
+}
+
+output "logs_container_url" {
+  value = "https://${azurerm_storage_account.bluebrick.name}.blob.core.windows.net/${azurerm_storage_container.logs.name}"
+}
+
+output "config_container_url" {
+  value = "https://${azurerm_storage_account.bluebrick.name}.blob.core.windows.net/${azurerm_storage_container.config.name}"
 }
 
 output "databricks_workspace_url" {
@@ -171,12 +234,20 @@ output "key_vault_uri" {
   value = azurerm_key_vault.bluebrick.vault_uri
 }
 
+output "hub_key_vault_name" {
+  value = var.enable_hub_spoke ? azurerm_key_vault.hub[0].name : null
+}
+
+output "hub_key_vault_uri" {
+  value = var.enable_hub_spoke ? azurerm_key_vault.hub[0].vault_uri : null
+}
+
 # Azure Data Factory: one per environment (spoke) and one in Hub for Integration Runtimes
 resource "azurerm_data_factory" "env" {
   count               = var.enable_adf ? 1 : 0
   name                = "adf-${local.prefix}"
-  location            = azurerm_resource_group.bluebrick.location
-  resource_group_name = azurerm_resource_group.bluebrick.name
+  location            = azurerm_resource_group.env_app.location
+  resource_group_name = azurerm_resource_group.env_app.name
   tags                = var.tags
 
   dynamic "github_configuration" {
@@ -197,7 +268,7 @@ resource "azurerm_data_factory" "hub" {
   name                = "adf-${var.project}-hub"
   location            = azurerm_resource_group.hub[0].location
   resource_group_name = azurerm_resource_group.hub[0].name
-  tags                = var.tags
+  tags                = merge(var.tags, { environment = "hub", env = "hub" })
 }
 
 resource "azurerm_data_factory_integration_runtime_self_hosted" "hub_shir" {

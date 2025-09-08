@@ -24,7 +24,7 @@ tags = {
 workspace_sku = "premium"
 
 # Enable Diagnostic Settings + Log Analytics (optional)
-enable_log_analytics       = false
+enable_log_analytics       = true
 log_analytics_retention_days = 30
 
 # Databricks provider auth (optional for workspace-scoped resources)
@@ -42,17 +42,17 @@ uc_schema  = "bluebrick_dev"
 dbr_version = "14.3.x-scala2.12"
 
 # Hub-and-Spoke networking
-enable_hub_spoke          = false
+enable_hub_spoke          = true
 hub_address_space         = "10.0.0.0/16"
 spoke_data_address_space  = "10.1.0.0/16"
 spoke_dbx_address_space   = "10.2.0.0/16"
-enable_vnet_injection     = false
+enable_vnet_injection     = true
 
 # Multi-subscription: Hub subscription id (spoke uses ARM_SUBSCRIPTION_ID)
-hub_subscription_id = ""
+hub_subscription_id = "1e8dde29-2563-4bea-9b4f-1bddc6356e85"
 
 # Azure Data Factory
-enable_adf = false
+enable_adf = true
 
 # Optional: Link the env ADF to this GitHub repo for dev authoring
 enable_adf_github   = false
