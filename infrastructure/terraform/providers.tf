@@ -6,14 +6,15 @@
 #   key                  = "bluebrick.terraform.tfstate"
 # }
 
+
 provider "azurerm" {
   features {}
 }
 
 # Hub subscription alias for cross-subscription deployments (Hub & Spoke)
 provider "azurerm" {
+  features {}
   alias           = "hub"
-  features        = {}
   subscription_id = var.hub_subscription_id
 }
 

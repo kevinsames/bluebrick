@@ -88,6 +88,5 @@ jobs:
 
       - name: Terraform Apply (${{ github.event.inputs.environment }})
         if: ${{ github.event.inputs.apply == 'true' }}
-        environment: production
         working-directory: infrastructure/terraform
         run: terraform apply -input=false tfplan

@@ -1,21 +1,32 @@
-variable "prefix" {
-  description = "Name prefix for all resources"
+variable "project" {
+  description = "Project name (e.g., bluebrick)"
   type        = string
   default     = "bluebrick"
+}
+
+variable "environment" {
+  description = "Deployment environment (e.g., dev, test, prod, hub)"
+  type        = string
+  default     = "dev"
 }
 
 variable "location" {
   description = "Azure region for resources"
   type        = string
-  default     = "eastus"
+  default     = "West Europe"
 }
 
 variable "tags" {
   description = "Resource tags"
   type        = map(string)
-  default     = {
-    project = "bluebrick"
-    env     = "dev"
+  default = {
+    project      = "bluebrick"
+    env          = "dev"
+    environment  = "dev"
+    owner        = "platform-team"
+    cost_center  = "bluebrick"
+    created_by   = "terraform"
+    contact      = ""
   }
 }
 
@@ -70,7 +81,7 @@ variable "uc_catalog" {
 variable "uc_schema" {
   description = "Unity Catalog schema name for examples"
   type        = string
-  default     = "bluebrick_dev"
+  default     = "bluebrick"
 }
 
 variable "databricks_host" {
@@ -129,6 +140,7 @@ variable "github_root_folder" {
   type        = string
   default     = "data-factory"
 }
+
 
 # Hub-and-Spoke Networking (optional)
 variable "enable_hub_spoke" {

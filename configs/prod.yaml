@@ -1,7 +1,20 @@
-catalog: main
-schema: bluebrick_prod
+catalogs:
+  coal: coal_prod
+  bronze: bronze_prod
+  silver: silver_prod
+  gold: gold_prod
+  metadata: metadata_prod
+  logs: logs_prod
+  config: config_prod
+
+# Default catalog to use for sample tables (keep for backward-compatibility)
+schema: bluebrick
 table: example_sales
 adls_account: "<adls-account-name>"
-adls_container: "coal"
-raw_path: "abfss://coal@<adls-account-name>.dfs.core.windows.net/sales/"
+coal_path: "abfss://coal@<adls-account-name>.dfs.core.windows.net/sales/"
+bronze_path: "abfss://bronze@<adls-account-name>.dfs.core.windows.net/sales_bronze/"
 silver_path: "abfss://silver@<adls-account-name>.dfs.core.windows.net/sales_silver/"
+gold_path: "abfss://gold@<adls-account-name>.dfs.core.windows.net/sales_gold/"
+metadata_path: "abfss://metadata@<adls-account-name>.dfs.core.windows.net/metadata/"
+logs_path: "abfss://logs@<adls-account-name>.dfs.core.windows.net/logs/"
+config_path: "abfss://config@<adls-account-name>.dfs.core.windows.net/config/"

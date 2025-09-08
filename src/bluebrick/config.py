@@ -72,15 +72,37 @@ def load_config(env: str | None = None) -> dict[str, Any]:
 
     if cfg_path and cfg_path.exists():
         with cfg_path.open("r", encoding="utf-8") as f:
-            return yaml.safe_load(f) or {}
+            cfg = yaml.safe_load(f) or {}
+            # If new-style catalogs map is present and no explicit default catalog,
+            # derive a sensible default (bronze) for sample notebooks/jobs.
+            catalogs = cfg.get("catalogs") or {}
+            if catalogs and "catalog" not in cfg:
+                cfg["catalog"] = catalogs.get("bronze") or next(iter(catalogs.values()), "bronze")
+            return cfg
 
     # Default fallback config
+    # Default fallback (new-style) with per-layer catalogs and implicit bronze default
+    catalogs = {
+        "coal": f"coal_{selected_env}",
+        "bronze": f"bronze_{selected_env}",
+        "silver": f"silver_{selected_env}",
+        "gold": f"gold_{selected_env}",
+        "metadata": f"metadata_{selected_env}",
+        "logs": f"logs_{selected_env}",
+        "config": f"config_{selected_env}",
+    }
     return {
-        "catalog": "main",
-        "schema": f"bluebrick_{selected_env}",
+        "catalogs": catalogs,
+        "catalog": catalogs["bronze"],  # implicit default for sample usage
+        "schema": "bluebrick",
         "table": "example_sales",
         "adls_account": "<adls-account-name>",
-        "adls_container": "raw",
-        "raw_path": "abfss://raw@<adls-account-name>.dfs.core.windows.net/sales/",
+        # Per-layer default paths
+        "coal_path": "abfss://coal@<adls-account-name>.dfs.core.windows.net/sales/",
+        "bronze_path": "abfss://bronze@<adls-account-name>.dfs.core.windows.net/sales_bronze/",
         "silver_path": "abfss://silver@<adls-account-name>.dfs.core.windows.net/sales_silver/",
+        "gold_path": "abfss://gold@<adls-account-name>.dfs.core.windows.net/sales_gold/",
+        "metadata_path": "abfss://metadata@<adls-account-name>.dfs.core.windows.net/metadata/",
+        "logs_path": "abfss://logs@<adls-account-name>.dfs.core.windows.net/logs/",
+        "config_path": "abfss://config@<adls-account-name>.dfs.core.windows.net/config/",
     }

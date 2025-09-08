@@ -4,12 +4,16 @@ This Terraform stack provisions a minimal Azure + Databricks foundation for the
 BlueBrick template:
 
 - Azure Resource Group
-- Azure Data Lake Storage Gen2 (StorageV2 with HNS), containers: `coal` (raw landing), `silver` (optional)
+- Azure Data Lake Storage Gen2 (StorageV2 with HNS), containers: `coal`, `bronze`, `silver`, `gold`, `metadata`, `logs`, `config`
 - Azure Databricks Workspace (SKU configurable)
 - Optional: Log Analytics + Diagnostic Settings
 - Optional: Databricks workspace-level resources (cluster, example UC grants)
 - Optional: Hub-and-Spoke networking with VNet peering and Storage private endpoints
 - Optional: Azure Data Factory (one per environment + one in Hub for Integration Runtimes)
+
+Diagram
+- A high-level architecture diagram is available at `docs/assets/diagram.drawio`.
+  Open it in diagrams.net/draw.io to view or edit.
 
 Notes
 - Databricks workspace-level resources are behind a feature flag (`enable_databricks`)
@@ -28,7 +32,8 @@ Usage
    ```
 4. Apply (when ready):
    ```bash
-  terraform -chdir=infrastructure/terraform apply -var-file=examples/terraform.tfvars.example
+   terraform -chdir=infrastructure/terraform apply -var-file=examples/terraform.tfvars.example
+   ```
 
 Multi-subscription (Hub & Spoke)
 - Use a single Service Principal with RBAC in all subscriptions (Hub + each Spoke env).
@@ -60,4 +65,3 @@ Data Layers
 - Bronze: Unity Catalog managed Delta tables. Append-only; no deletes. 1:1 with coal artifacts but typed, deduplicated, with metadata columns. Optionally preserve history (SCD2).
 - Silver: Unity Catalog managed Delta tables enriched with business logic and standardization.
 - Gold: Unity Catalog managed Delta tables serving downstream use cases; one schema per use case with read/write permissions per interface contract.
-   ```
